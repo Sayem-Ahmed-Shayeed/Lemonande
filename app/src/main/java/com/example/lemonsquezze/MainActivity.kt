@@ -44,7 +44,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LemonSquezzeTheme {
-                // Call LemonSqueezeApp with the application context
                 LemonSqueezeApp(context = applicationContext)
             }
         }
@@ -90,10 +89,7 @@ fun LemonSqueezeApp(context : Context) {
         3 -> stringResource(R.string.lemonade)
         else -> stringResource(R.string.empty_glass)
     }
-
-    // Create a MediaPlayer instance
     val mediaPlayer = remember { MediaPlayer() }
-
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -105,8 +101,6 @@ fun LemonSqueezeApp(context : Context) {
                 if (value == 1) {
                     value++
                     randomSqueezeCount = (4..10).random()
-
-                    // Play sound for state 1
                     playSound(context, mediaPlayer, R.raw.memesnd1)
                 } else if (value == 2) {
                     if (squeezeCount < randomSqueezeCount) {
@@ -145,8 +139,6 @@ fun LemonSqueezeApp(context : Context) {
             fontWeight = FontWeight.Bold,
         )
     }
-
-    // Dispose of MediaPlayer when the composable is disposed
     DisposableEffect(Unit) {
         onDispose {
             mediaPlayer.release()
@@ -154,7 +146,6 @@ fun LemonSqueezeApp(context : Context) {
     }
 }
 
-// Helper function to play sound
 private fun playSound(context : Context, mediaPlayer : MediaPlayer, soundResourceId : Int) {
     mediaPlayer.reset()
     mediaPlayer.setDataSource(
