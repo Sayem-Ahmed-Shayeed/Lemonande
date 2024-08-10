@@ -1,5 +1,8 @@
 package com.example.lemonsquezze
 
+import android.content.Context
+import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -25,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,17 +44,18 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LemonSquezzeTheme {
-                LemonSquezzeApp()
+                // Call LemonSqueezeApp with the application context
+                LemonSqueezeApp(context = applicationContext)
             }
         }
     }
 }
 
 @Composable
-fun LemonSquezzeApp() {
+fun LemonSqueezeApp(context : Context) {
     Box(
         modifier = Modifier
-            .background(Color.Yellow) // Set the background color
+            .background(Color.Yellow)
             .padding(8.dp)
             .fillMaxWidth(),
     ) {
@@ -84,6 +90,10 @@ fun LemonSquezzeApp() {
         3 -> stringResource(R.string.lemonade)
         else -> stringResource(R.string.empty_glass)
     }
+
+    // Create a MediaPlayer instance
+    val mediaPlayer = remember { MediaPlayer() }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -95,17 +105,27 @@ fun LemonSquezzeApp() {
                 if (value == 1) {
                     value++
                     randomSqueezeCount = (4..10).random()
+
+                    // Play sound for state 1
+                    playSound(context, mediaPlayer, R.raw.memesnd1)
                 } else if (value == 2) {
                     if (squeezeCount < randomSqueezeCount) {
                         squeezeCount++
+                        playSound(context, mediaPlayer, R.raw.squeezeaudio)
+                        if (squeezeCount == randomSqueezeCount) {
+                            playSound(context, mediaPlayer, R.raw.yametekudusai)
+                        }
                     } else {
+                        playSound(context, mediaPlayer, R.raw.lethimcook)
                         value++
                         squeezeCount = 0
                     }
                 } else if (value == 3) {
                     value++
+                    playSound(context, mediaPlayer, R.raw.ronaldodrinking)
                 } else {
                     value = 1
+                    playSound(context, mediaPlayer, R.raw.ooooooooomemesound)
                 }
             },
             modifier = Modifier,
@@ -125,12 +145,30 @@ fun LemonSquezzeApp() {
             fontWeight = FontWeight.Bold,
         )
     }
+
+    // Dispose of MediaPlayer when the composable is disposed
+    DisposableEffect(Unit) {
+        onDispose {
+            mediaPlayer.release()
+        }
+    }
+}
+
+// Helper function to play sound
+private fun playSound(context : Context, mediaPlayer : MediaPlayer, soundResourceId : Int) {
+    mediaPlayer.reset()
+    mediaPlayer.setDataSource(
+        context,
+        Uri.parse("android.resource://${context.packageName}/$soundResourceId")
+    )
+    mediaPlayer.prepare()
+    mediaPlayer.start()
 }
 
 @Preview(showBackground = true)
 @Composable
 fun LemonSquezzePreview() {
     LemonSquezzeTheme {
-        LemonSquezzeApp()
+        LemonSqueezeApp(LocalContext.current)
     }
 }
